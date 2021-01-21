@@ -1,0 +1,35 @@
+name: github pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'source/_posts/**'
+      - '.github/**'
+jobs:
+  deploy:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+            node-version: '15'
+      - name: Cache node modules
+        uses: actions/cache@v1
+        with:
+            path: node_modules
+            key: ${{runner.OS}}-${{hashFiles('**/package-lock.json')}}
+      - name: Build 
+        run: |
+            git submodule init
+            git submodule update
+            npm install hexo-cli -g
+            npm install
+            hexo generate
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          cname: homehostpage.com
+          publish_dir: ./public
